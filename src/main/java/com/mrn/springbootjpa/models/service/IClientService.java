@@ -1,11 +1,10 @@
-package com.mrn.springbootjpa.models.dao;
+package com.mrn.springbootjpa.models.service;
 
 import com.mrn.springbootjpa.models.entity.Client;
 
 import java.util.List;
 
-public interface IClientDAO {
-
+public interface IClientService {
     // return all clients
     List<Client> findAll();
 

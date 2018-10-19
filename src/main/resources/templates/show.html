@@ -1,30 +1,60 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title th:text="${title}"></title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 </head>
 <body>
-<h1 th:text="${title}"></h1>
 
-<table>
-    <thead>
-    <tr>id</tr>
-    <tr>First Name</tr>
-    <tr>Last Name</tr>
-    <tr>email</tr>
-    <tr>Date</tr>
-    </thead>
+<%--Menu navigation--%>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="#">Spring Boot & Thymeleaf</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle Navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active"><a class="nav-link" href="#">Home</a></li>
+            <li class="nav-item active"><a class="nav-link" th:href="@{/show}">Clients</a></li>
+        </ul>
+    </div>
+</nav>
 
-    <tbody>
-    <tr th:each="client : ${clients}">
-        <td th:text="${client.id}"></td>
-        <td th:text="${client.firstName}"></td>
-        <td th:text="${client.lastName}"></td>
-        <td th:text="${client.email}"></td>
-        <td th:text="${client.createAt}"></td>
-    </tr>
-    </tbody>
-</table>
+<div class="container" style="padding-top: 40px;">
+    <h1 class="text-success border border-success border-top-0 border-left-0 border-right-0"
+        th:text="${title}"></h1>
+
+    <p><a class="btn btn-success btn-xs" th:href="@{/form}">Create new client</a></p>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="client : ${clients}">
+            <td th:text="${client.id}"></td>
+            <td th:text="${client.firstName}"></td>
+            <td th:text="${client.lastName}"></td>
+            <td th:text="${client.email}"></td>
+            <td th:text="${client.createAt}"></td>
+            <td><a class="btn btn-primary btn-xs" th:href="@{/form/} + ${client.id}" th:text="'Edit'"></a></td>
+            <td><a class="btn btn-danger btn-xs" th:href="@{/delete/} + ${client.id}" th:text="'Delete'"
+                   onclick="confirm('Do you want to confirm deletion?');"></a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

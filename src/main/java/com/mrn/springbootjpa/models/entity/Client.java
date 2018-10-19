@@ -1,6 +1,11 @@
 package com.mrn.springbootjpa.models.entity;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -14,13 +19,21 @@ public class Client implements Serializable {
 
     // @Column - we can omit when the columns we want to name is the same with the column in table
     @Column(name="first_name")
+    @NotEmpty
     private String firstName;
+
+    @NotEmpty
     @Column(name="last_name")
     private String lastName;
+
+    @NotEmpty
+    @Email
     private String email;
 
+    @NotNull
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date createAt;
 
     public Long getId() {
@@ -62,4 +75,14 @@ public class Client implements Serializable {
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
     }
+
+
+    /*
+    * Is used to specify callback methods for the corresponding lifecycle event.
+    * This annotation may be applied to methods of an entity class, a mapped superclass, or a callback listener class.
+    * */
+//    @PrePersist
+//    public void prePersist() {
+//        createAt = new Date();
+//    }
 }
