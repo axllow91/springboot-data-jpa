@@ -1,20 +1,11 @@
 package com.mrn.springbootjpa.models.dao;
 
 import com.mrn.springbootjpa.models.entity.Client;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
 
-public interface IClientDAO {
+// CrudRepository interface has all method we need to handle an object
+// save/findOne/delete/deleteAll/count/exists
+public interface IClientDAO extends CrudRepository<Client, Long> {
 
-    // return all clients
-    List<Client> findAll();
-
-    // save client
-    void save(Client client);
-
-    // find client by id
-    Client findById(Long id);
-
-    // delete client by id
-    void deleteById(Long id);
 }

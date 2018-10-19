@@ -20,7 +20,7 @@ public class ClientServiceImpl implements IClientService {
     @Override
     @Transactional(readOnly = true)
     public List<Client> findAll() {
-        return clientDAO.findAll();
+        return (List<Client>) clientDAO.findAll();
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ClientServiceImpl implements IClientService {
     @Override
     @Transactional(readOnly = true)
     public Client findById(Long id) {
-        return clientDAO.findById(id);
+        return clientDAO.findById(id).orElse(null);
     }
 
     @Override
