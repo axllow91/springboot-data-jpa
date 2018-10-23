@@ -1,11 +1,10 @@
 package com.mrn.springbootjpa.models.dao;
 
 import com.mrn.springbootjpa.models.entity.Client;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-
-// CrudRepository interface has all method we need to handle an object
-// save/findOne/delete/deleteAll/count/exists
-public interface IClientDAO extends CrudRepository<Client, Long> {
+// Extension of CrudRepository to provide additional methods
+// to retrieve entities using the pagination and sorting abstraction.
+public interface IClientDAO extends PagingAndSortingRepository<Client, Long> {
 
 }

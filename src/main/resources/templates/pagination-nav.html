@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<nav th:fragment="pagination">
+    <!--/*@thymesVar id="page" type="com.mrn.springbootjpa.util.paginator.PageRender"*/-->
+    <ul class="pagination">
+        <!--
+            With the th:class i can disabled the pages numb button
+            so when i'm first page it's disable else is enabled
+            "if i'm on this page can't click that numb else click that numb
+        -->
+        <li class="page-item" th:class="${page.first ? 'page-item disabled' : 'page-item'}">
+            <span class="page-link" th:if="${page.first}">First</span>
+            <a class="page-link" th:if="${not page.first}" th:href="@{${page.url}(page=0)}">First</a>
+        </li>
+
+        <li class="page-item" th:class="${not page.ishasPrevious() ? 'page-item disabled' : 'page-item'}">
+            <span class="page-link" th:if="${not page.ishasPrevious()}">&laquo;</span>
+            <a class="page-link" th:if="${page.ishasPrevious()}" th:href="@{${page.url}(page=${page.actualPage - 2})}">&laquo;</a>
+        </li>
+
+        <!--iterate through all pages-->
+        <li class="page-item" th:each="item : ${page.pages}" th:class="${item.actualPage? 'page-item active': ''}">
+            <span class="page-link" th:if="${item.actualPage}" th:text="${item.numOfPage}"></span>
+            <a class="page-link" th:if="${not item.actualPage}" th:href="@{${page.url}(page=${item.numOfPage - 1})}" th:text="${item.numOfPage}"></a>
+        </li>
+
+        <li class="page-item" th:class="${not page.ishasNext() ? 'page-item disabled' : 'page-item'}">
+            <span class="page-link" th:if="${not page.ishasNext()}">&raquo;</span>
+            <a class="page-link" th:if="${page.ishasNext()}" th:href="@{${page.url}(page=${page.actualPage})}">&raquo;</a>
+        </li>
+
+        <li class="page-item" th:class="${page.last ? 'page-item disabled' : 'page-item'}">
+            <span class="page-link" th:if="${page.last}">Last</span>
+            <a class="page-link" th:if="${not page.last}" th:href="@{${page.url}(page=${page.totalPages - 1})}">Last</a>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

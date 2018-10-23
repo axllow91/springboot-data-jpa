@@ -3,8 +3,10 @@ package com.mrn.springbootjpa.models.serviceImp;
 import com.mrn.springbootjpa.models.dao.IClientDAO;
 import com.mrn.springbootjpa.models.entity.Client;
 import com.mrn.springbootjpa.models.service.IClientService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -22,6 +24,12 @@ public class ClientServiceImpl implements IClientService {
     public List<Client> findAll() {
         return (List<Client>) clientDAO.findAll();
     }
+
+    @Override
+    public Page<Client> findAll(Pageable pageable) {
+        return clientDAO.findAll(pageable);
+    }
+
 
     @Override
     @Transactional

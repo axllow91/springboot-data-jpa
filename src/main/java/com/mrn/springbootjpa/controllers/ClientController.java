@@ -2,13 +2,14 @@ package com.mrn.springbootjpa.controllers;
 
 import com.mrn.springbootjpa.models.entity.Client;
 import com.mrn.springbootjpa.models.service.IClientService;
+import com.mrn.springbootjpa.util.paginator.PageRender;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -28,10 +29,17 @@ public class ClientController {
 
 
     @RequestMapping(value = "/show", method = RequestMethod.GET)
-    public String show(Model model) {
+    public String show(Model model, @RequestParam(name = "page", defaultValue = "0") int page) {
+
+        Pageable pageRequest = PageRequest.of(page, 5);
+
+        Page<Client> clients = clientService.findAll(pageRequest);
+
+        PageRender<Client> pageRender = new PageRender<>("/show", clients);
 
         model.addAttribute("title", "List of all clients");
-        model.addAttribute("clients", clientService.findAll());
+        model.addAttribute("clients", clients);
+        model.addAttribute("page", pageRender);
 
         return "show";
     }

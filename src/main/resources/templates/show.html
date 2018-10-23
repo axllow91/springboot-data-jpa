@@ -6,15 +6,15 @@
 <header th:replace="/layout/layout :: header"></header>
 
 <div class="container py-4">
-    <div class="card bg-dark text-white">
+    <div class="card bg-light text-dark">
         <div class="card-header" th:text="${title}"></div>
         <div class="card-body"></div>
 
-        <h4 class="card-title"><a class="btn btn-primary btn-xs" th:href="@{/form}">Create new client</a></h4>
+        <h4 class="card-title"><a class="btn btn-primary btn-xs" th:href="@{/form}">New Client</a></h4>
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>id</th>
+                <th>ID</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Email</th>
@@ -37,6 +37,8 @@
             </tr>
             </tbody>
         </table>
+
+        <nav th:replace="pagination-nav :: pagination"></nav>
     </div>
 
     <footer th:replace="/layout/layout :: footer"></footer>
