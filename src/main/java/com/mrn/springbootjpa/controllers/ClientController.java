@@ -5,9 +5,13 @@ import com.mrn.springbootjpa.models.service.IClientService;
 import com.mrn.springbootjpa.util.paginator.PageRender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,7 +70,9 @@ public class ClientController {
     @RequestMapping(value = "/form/{id}")
     public String editClient(@PathVariable(value = "id") Long id, Map<String, Object> model, RedirectAttributes flash) {
 
+        // Create an empty client obj
         Client client = null;
+
         if (id > 0) {
             client = clientService.findById(id);
             if (client == null) {
@@ -84,6 +91,29 @@ public class ClientController {
         return "form";
     }
 
+    @GetMapping(value="/uploads/{filename:.+}") // spring will truncate the extension because we need to charge this img
+    public ResponseEntity<Resource> viewImage(@PathVariable String filename) {
+        Path pathImage = Paths.get("uploads").resolve(filename).toAbsolutePath(); // make this the absolute path
+
+        log.info("path Image: " + pathImage);
+        Resource resource = null;
+        try {
+            resource = new UrlResource(pathImage.toUri());
+            if(!resource.exists() || !resource.isReadable()) {
+                throw new RuntimeException("Error: Could not upload image: " + pathImage.toString());
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + (resource != null ? resource.getFilename() : null) + "\"")
+                .body(resource);
+    }
+
 
     @RequestMapping(value = "/form", method = RequestMethod.POST)
     public String saveForm(@Valid Client client, BindingResult bindingResult, Model model,
@@ -99,6 +129,7 @@ public class ClientController {
         // upload image
         if(!image.isEmpty()) {
 
+            // concatenate to filename an new randomUUID
             String uniqueFilename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
             Path rootPath = Paths.get("uploads").resolve(image.getOriginalFilename());
 
@@ -152,5 +183,4 @@ public class ClientController {
 
         return "view";
     }
-
 }
