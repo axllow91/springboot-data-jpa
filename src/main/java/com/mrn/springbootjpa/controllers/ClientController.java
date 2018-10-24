@@ -3,6 +3,8 @@ package com.mrn.springbootjpa.controllers;
 import com.mrn.springbootjpa.models.entity.Client;
 import com.mrn.springbootjpa.models.service.IClientService;
 import com.mrn.springbootjpa.util.paginator.PageRender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +22,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @SessionAttributes("client") // -> better practice to hide the id(instead of hiding into html)
 public class ClientController {
 
     private final IClientService clientService;
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     // autowired with the help of the constructor
     public ClientController(IClientService clientService) {
@@ -94,15 +98,19 @@ public class ClientController {
 
         // upload image
         if(!image.isEmpty()) {
-//            Path path = Paths.get("src//main//resources//static/uploads");
-            String rootPath = "C://Temp//uploads";
-            try {
-                byte[] bytes = image.getBytes();
-                Path completeRoot = Paths.get(rootPath + "//" + image.getOriginalFilename());
-                Files.write(completeRoot, bytes);
-                flash.addFlashAttribute("info", "Uploaded successfully '" + image.getOriginalFilename() + "'");
 
-                client.setImage(image.getOriginalFilename());
+            String uniqueFilename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+            Path rootPath = Paths.get("uploads").resolve(image.getOriginalFilename());
+
+            Path absolutePath = rootPath.toAbsolutePath();
+
+            log.info("rootPath: " + rootPath);
+            log.info("absolutePath: " + absolutePath);
+
+            try {
+                Files.copy(image.getInputStream(), absolutePath);
+                flash.addFlashAttribute("info", "Uploaded successfully '" + uniqueFilename + "'");
+                client.setImage(uniqueFilename);
             }catch (IOException e) {
                 e.printStackTrace();
             }
