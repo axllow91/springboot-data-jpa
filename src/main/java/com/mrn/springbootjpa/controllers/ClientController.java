@@ -11,9 +11,14 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 @Controller
@@ -77,13 +82,32 @@ public class ClientController {
 
 
     @RequestMapping(value = "/form", method = RequestMethod.POST)
-    public String saveForm(@Valid Client client, BindingResult bindingResult, Model model, SessionStatus status, RedirectAttributes flash) {
+    public String saveForm(@Valid Client client, BindingResult bindingResult, Model model,
+                           @RequestParam(name="file") MultipartFile image,
+                           SessionStatus status, RedirectAttributes flash) {
 
         if (bindingResult.hasErrors()) {
             // return the actual form with resulted errors
             model.addAttribute("title", "List of all clients");
             return "form";
         }
+
+        // upload image
+        if(!image.isEmpty()) {
+//            Path path = Paths.get("src//main//resources//static/uploads");
+            String rootPath = "C://Temp//uploads";
+            try {
+                byte[] bytes = image.getBytes();
+                Path completeRoot = Paths.get(rootPath + "//" + image.getOriginalFilename());
+                Files.write(completeRoot, bytes);
+                flash.addFlashAttribute("info", "Uploaded successfully '" + image.getOriginalFilename() + "'");
+
+                client.setImage(image.getOriginalFilename());
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         String messageFlash = (client.getId() != null) ? "Client edited successfully!" : "Client created successfully!";
 
         clientService.save(client);
@@ -101,6 +125,24 @@ public class ClientController {
             flash.addFlashAttribute("success", "Client removed successfully!");
         }
         return "redirect:/show";
+    }
+
+    @GetMapping(value="/view/{id}")
+    public String view(@PathVariable(value = "id") Long id, Map<String, Object> model, RedirectAttributes flash) {
+        // find the client
+        Client client = clientService.findById(id);
+
+        // if non existent client
+        // return me to show template
+        if(client == null) {
+            flash.addFlashAttribute("error", "The client does not exist!");
+            return "redirect:/show";
+        }
+
+        model.put("client", client);
+        model.put("title", "Client details: " + client.fullName());
+
+        return "view";
     }
 
 }

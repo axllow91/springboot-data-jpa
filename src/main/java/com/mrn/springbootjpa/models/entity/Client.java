@@ -30,6 +30,8 @@ public class Client implements Serializable {
     @Email
     private String email;
 
+    private String image;
+
     @NotNull
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
@@ -76,6 +78,17 @@ public class Client implements Serializable {
         this.createAt = createAt;
     }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+   public String fullName() {
+        return firstName + ' ' + lastName;
+   }
 
     /*
     * Is used to specify callback methods for the corresponding lifecycle event.
