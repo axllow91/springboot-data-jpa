@@ -8,8 +8,8 @@
         <div class="card-header" th:text="${title}"></div>
         <div class="card-body">
             <!--thumbnail image for client-->
-            <img th:if="${#strings.length(client.image) > 0}"
-                 class="img-thumbnail rounded float-left" style="max-width: 25%;" th:src="@{'/uploads/'
+            <img src="#" th:if="${#strings.length(client.image) > 0}"
+                 class="img-thumbnail rounded float-left" style="max-width: 25%;" th:src="@{'uploads/'
                             + ${client.image}}" th:alt="${client.image}"/>
 
             <!--list with all details-->
@@ -22,7 +22,6 @@
         </div>
     </div>
 </div>
-
 
 <footer th:replace="layout/layout :: footer"></footer>
 </body>

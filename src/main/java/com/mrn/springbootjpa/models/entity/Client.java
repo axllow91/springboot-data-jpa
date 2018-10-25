@@ -30,6 +30,7 @@ public class Client implements Serializable {
     @Email
     private String email;
 
+    @Column(name="image")
     private String image;
 
     @NotNull

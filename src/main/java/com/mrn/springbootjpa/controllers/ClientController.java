@@ -2,11 +2,9 @@ package com.mrn.springbootjpa.controllers;
 
 import com.mrn.springbootjpa.models.entity.Client;
 import com.mrn.springbootjpa.models.service.IClientService;
+import com.mrn.springbootjpa.models.service.IUploadFileService;
 import com.mrn.springbootjpa.util.paginator.PageRender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,24 +21,22 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
-import java.util.UUID;
 
 @Controller
 @SessionAttributes("client") // -> better practice to hide the id(instead of hiding into html)
 public class ClientController {
 
     private final IClientService clientService;
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final IUploadFileService uploadFileService;
+
+
 
     // autowired with the help of the constructor
-    public ClientController(IClientService clientService) {
+    public ClientController(IClientService clientService, IUploadFileService uploadFileService) {
         this.clientService = clientService;
+        this.uploadFileService = uploadFileService;
     }
-
 
     @RequestMapping(value = "/show", method = RequestMethod.GET)
     public String show(Model model, @RequestParam(name = "page", defaultValue = "0") int page) {
@@ -84,29 +80,22 @@ public class ClientController {
             return "redirect:/show";
         }
 
-
         model.put("client", client);
         model.put("title", "Edit client");
 
         return "form";
     }
 
-    @GetMapping(value="/uploads/{filename:.+}") // spring will truncate the extension because we need to charge this img
+    @GetMapping(value = "/uploads/{filename:.+}")
+    // spring will truncate the extension because we need to charge this img
     public ResponseEntity<Resource> viewImage(@PathVariable String filename) {
-        Path pathImage = Paths.get("uploads").resolve(filename).toAbsolutePath(); // make this the absolute path
 
-        log.info("path Image: " + pathImage);
         Resource resource = null;
         try {
-            resource = new UrlResource(pathImage.toUri());
-            if(!resource.exists() || !resource.isReadable()) {
-                throw new RuntimeException("Error: Could not upload image: " + pathImage.toString());
-            }
-
+            resource = uploadFileService.load(filename);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -114,10 +103,9 @@ public class ClientController {
                 .body(resource);
     }
 
-
     @RequestMapping(value = "/form", method = RequestMethod.POST)
     public String saveForm(@Valid Client client, BindingResult bindingResult, Model model,
-                           @RequestParam(name="file") MultipartFile image,
+                           @RequestParam(name = "file") MultipartFile image,
                            SessionStatus status, RedirectAttributes flash) {
 
         if (bindingResult.hasErrors()) {
@@ -127,53 +115,61 @@ public class ClientController {
         }
 
         // upload image
-        if(!image.isEmpty()) {
+        if (!image.isEmpty()) {
 
-            // concatenate to filename an new randomUUID
-            String uniqueFilename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-            Path rootPath = Paths.get("uploads").resolve(image.getOriginalFilename());
+            // check if client exists first && image exists after
+            if (client.getId() != null
+                    && client.getId() > 0
+                    && client.getImage() != null
+                    && client.getImage().length() > 0) {
 
-            Path absolutePath = rootPath.toAbsolutePath();
-
-            log.info("rootPath: " + rootPath);
-            log.info("absolutePath: " + absolutePath);
-
-            try {
-                Files.copy(image.getInputStream(), absolutePath);
-                flash.addFlashAttribute("info", "Uploaded successfully '" + uniqueFilename + "'");
-                client.setImage(uniqueFilename);
-            }catch (IOException e) {
-                e.printStackTrace();
+                uploadFileService.delete(client.getImage());
             }
         }
+
+        String uniqueFilename = null;
+        try {
+            uniqueFilename = uploadFileService.copy(image);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        flash.addFlashAttribute("info", "Uploaded successfully '" + uniqueFilename + "'");
+        client.setImage(uniqueFilename);
 
         String messageFlash = (client.getId() != null) ? "Client edited successfully!" : "Client created successfully!";
 
         clientService.save(client);
         status.setComplete();
-        flash.addFlashAttribute("success", messageFlash);
-        return "redirect:show";
-    }
+        flash.addFlashAttribute("success",messageFlash);
+
+        return"redirect:show";
+}
 
     @RequestMapping(value = "/delete/{id}")
     public String remove(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 
         if (id > 0) {
+            Client client = clientService.findById(id);
             clientService.deleteById(id);
             // after the operation is finished successfully redirect me to the place i want
             flash.addFlashAttribute("success", "Client removed successfully!");
+
+            if(uploadFileService.delete(client.getImage())) {
+                flash.addFlashAttribute("info", "Image " + client.getImage() + " deleted successfully");
+            }
         }
         return "redirect:/show";
     }
 
-    @GetMapping(value="/view/{id}")
+    @GetMapping(value = "/view/{id}")
     public String view(@PathVariable(value = "id") Long id, Map<String, Object> model, RedirectAttributes flash) {
         // find the client
         Client client = clientService.findById(id);
 
         // if non existent client
         // return me to show template
-        if(client == null) {
+        if (client == null) {
             flash.addFlashAttribute("error", "The client does not exist!");
             return "redirect:/show";
         }
