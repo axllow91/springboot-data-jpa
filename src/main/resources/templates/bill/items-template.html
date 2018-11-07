@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/" lang="en">
+
+<body>
+<table th:fragment="itemsTemplate" class="d-none">
+    <tbody id="itemsTemplateBill">
+    <tr id="row_{ID}">
+        <td class="d-none"><input type="hidden" value="{ID}" name="item_id[]"/></td>
+        <td>{NAME}</td>
+        <td><input type="number" value="1" min="0" name="amount[]" id="amount_{ID}" class="form-control col-sm-4"
+                   onchange="itemsHelper.calculateAmount({ID}, {PRICE}, this.value);"/></td>
+        <td>{PRICE}</td>
+        <td><span id="total_amount_{ID}">0</span></td>
+        <td><a href="#" class="btn btn-danger btn-xs" onclick="itemsHelper.deleteRowBill({ID});">x</a></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

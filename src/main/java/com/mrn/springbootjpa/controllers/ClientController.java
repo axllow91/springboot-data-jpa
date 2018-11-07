@@ -31,7 +31,6 @@ public class ClientController {
     private final IUploadFileService uploadFileService;
 
 
-
     // autowired with the help of the constructor
     public ClientController(IClientService clientService, IUploadFileService uploadFileService) {
         this.clientService = clientService;
@@ -168,7 +167,7 @@ public class ClientController {
         Client client = clientService.findById(id);
 
         // if non existent client
-        // return me to show template
+        // return me to show bill
         if (client == null) {
             flash.addFlashAttribute("error", "The client does not exist!");
             return "redirect:/show";

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -67,7 +68,23 @@ public class UploadFileServiceImpl implements IUploadFileService {
         return false;
     }
 
-    public Path getPath(String filename) {
+    @Override
+    public void deleteAll() {
+        //FileSystemUtils -> Utility methods for working with the file system.
+        // deleteRecursively() -> Delete the supplied File - for directories, recursively delete
+        // any nested directories or files as well
+        // deletes all files and directory with him
+        FileSystemUtils.deleteRecursively(Paths.get(UPLOAD_FOLDER).toFile());
+    }
+
+    @Override
+    public void init() throws IOException {
+        // create the directory
+        Files.createDirectory(Paths.get(UPLOAD_FOLDER));
+    }
+
+    // get the path of upload folder
+    private Path getPath(String filename) {
         return Paths.get(UPLOAD_FOLDER).resolve(filename).toAbsolutePath(); // make this the absolute path
     }
 }

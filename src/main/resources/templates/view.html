@@ -7,6 +7,11 @@
     <div class="card bg-light">
         <div class="card-header" th:text="${title}"></div>
         <div class="card-body">
+
+            <h4 class="card-title">
+                <a class="btn btn-primary btn-xs" th:href="@{'/bill/form/' + ${client.id}}" th:text="'Create bill'"></a>
+            </h4>
+
             <!--thumbnail image for client-->
             <img src="#" th:if="${#strings.length(client.image) > 0}"
                  class="img-thumbnail rounded float-left" style="max-width: 25%;" th:src="@{'uploads/'
@@ -19,10 +24,35 @@
                 <li class="list-group-item" th:text="${client.email}"></li>
                 <li class="list-group-item" th:text="${client.createAt}"></li>
             </ul>
+
+            <div th:if="${#lists.isEmpty(client.billsList)}" class="alert alert-info my-4"
+                 th:text="'There is no existent bill for client ' + ${client.fullName()}"></div>
+
+            <!--this is when we know we have some bills added to client-->
+            <table th:if="${not #lists.isEmpty(client.billsList)}" class="table table-bordered table-striped my-4">
+                <thread>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                    </tr>
+                </thread>
+                <tbody>
+                <tr th:each="bill : ${client.billsList}">
+                    <td th:text="${bill.id}"></td>
+                    <td th:text="${bill.description}"></td>
+                    <td th:text="${bill.createAt}"></td>
+                    <td th:text="${bill.getTotal()}"></td>
+                </tr>
+                </tbody>
+
+            </table>
         </div>
     </div>
 </div>
 
 <footer th:replace="layout/layout :: footer"></footer>
+
 </body>
 </html>

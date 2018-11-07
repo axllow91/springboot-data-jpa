@@ -1,6 +1,7 @@
 package com.mrn.springbootjpa.models.service;
 
 import com.mrn.springbootjpa.models.entity.Client;
+import com.mrn.springbootjpa.models.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,4 +22,7 @@ public interface IClientService {
 
     // delete client by id
     void deleteById(Long id);
+
+    List<Product> findByProductName(String term);
+
 }

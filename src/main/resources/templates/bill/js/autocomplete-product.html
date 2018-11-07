@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<body>
+<script type="text/javascript" th:fragment="javascript">
+    $(document).ready(function () {
+        $('#search_product').autocomplete({
+
+            source: function (request, response) {
+                $.ajax({
+                    url: "/bill/load-products/" + request.term,
+                    dataType: "json",
+                    data: {term: request.term},
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                value: item.id,
+                                label: item.productName,
+                                price: item.price
+                            };
+                        }));
+                    }
+                });
+            },
+
+            select: function (event, ui) {
+                event.preventDefault();
+                // $('#search_product').val(ui.item.label);
+
+                // check for the product
+                if (itemsHelper.hasProduct(ui.item.value)) {
+                    // calculate if product exists
+                    itemsHelper.incrementAmount(ui.item.value, ui.item.price);
+
+                    // return false if does not exist
+                    return false;
+                }
+
+                var line = $('#itemsTemplateBill').html();
+
+                line = line.replace(/{ID}/g, ui.item.value);
+                line = line.replace(/{NAME}/g, ui.item.label);
+                line = line.replace(/{PRICE}/g, ui.item.price);
+
+                $('#loadItemProduct tbody').append(line);
+
+                //
+                itemsHelper.calculateAmount(ui.item.value, ui.item.price, 1);
+
+                return false;
+            }
+        });
+    });
+
+    var itemsHelper = {
+        calculateAmount: function (id, price, amount) {
+
+            // total for nr of items
+            $('#total_amount_' + id).html(parseInt(price * amount));
+
+            // at the same time calculate the big total
+            this.calculateTotalBill();
+        },
+
+        // check if this product exists
+        hasProduct: function (id) {
+            var result = false;
+
+            // iterate input(item_id)  for every id and ask if exists
+            $('input[name="item_id[]"]').each(function () {
+                // check if the id introduced is the same with the value we have
+                if (parseInt(id) == $(this).val()) {
+                    result = true;
+                }
+            });
+            return result;
+        },
+
+        incrementAmount: function (id, price) {
+            var getAmountVal = $('#amount_' + id).val(); // get the value
+            // console.log('getAmountVal: ' + getAmountVal);
+            // make sure when increment one item
+            // to not create another row; returns false when items are not the same
+            // if this amount exists convert it and assign it to amount variable
+            var amount = getAmountVal ? parseInt(getAmountVal) : 0;
+            // increment the value
+            $('#amount_' + id).val(++amount);
+            // console.log('Incremented amount: ' +   $('#amount_' + id).val(++amount));
+
+            // calculate amount when item is incremented (amount holds the number of items)
+            this.calculateAmount(id, price, amount);
+        },
+
+        deleteRowBill: function (id) {
+            $('#row_' + id).remove();
+
+            // do the recalculation
+            this.calculateTotalBill();
+        },
+
+        calculateTotalBill: function () {
+            var total = 0;
+            $('span[id^="total_amount_"]').each(function() {
+                total += parseInt($(this).html());
+            });
+
+            // add total to html
+            $('#big_total').html(total);
+
+        }
+    }
+
+</script>
+</body>
+</html>
